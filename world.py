@@ -22,6 +22,9 @@ class Snake:
         self.length = 1
         self.growing = False
 
+    def get_head(self):
+        return self.body[-1]
+
 
 class World:
     def __init__(self):
@@ -42,7 +45,7 @@ class World:
 
     def move_snake(self, new_direction=None):
 
-        head = self.snake.body[-1]
+        head = self.snake.get_head()
         if len(self.snake.body) == 1:
             self.snake.score += self.scores[head[1]][head[0]]
             self.snake.length = self.scores[head[1]][head[0]] + 1
