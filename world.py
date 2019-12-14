@@ -15,23 +15,27 @@ class Direction:
 
 class Snake:
 
-    def __init__(self, x, y, direction):
+    def __init__(self, x, y, direction, color):
         self.body = [(x, y)]
         self.score = 0
         self.direction = direction
         self.length = 1
         self.growing = False
+        self.color = color
 
     def get_head(self):
         return self.body[-1]
 
 
 class World:
+    COLORS = ["red", "green", "blue", "magneta", "cyan"]
     def __init__(self):
         self.height = 12
         self.width = 40
         self.min_score = 1
         self.max_score = 15
+        self.score_c = 5
+        self.snake_num = 3
 
         self.scores = []
 
@@ -41,20 +45,22 @@ class World:
                 row.append(random.randint(self.min_score, self.max_score))
             self.scores.append(row)
 
-        self.snake = Snake(0, 0, Direction.RIGHT)
+        self.snakes = []
+        for i in range(self.snake_num):
+            self.snakes.append(Snake(random.randint(0, self.width-1), random.randint(0, self.height-1), "rlud"[random.randint(0,3)], World.COLORS[i]))
 
-    def move_snake(self, new_direction=None):
+    def move_snake(self, snake , new_direction=None):
 
-        head = self.snake.get_head()
-        if len(self.snake.body) == 1:
-            self.snake.score += self.scores[head[1]][head[0]]
-            self.snake.length = self.scores[head[1]][head[0]] + 1
-            self.snake.growing = True
+        head = snake.get_head()
+        if len(snake.body) == 1:
+            snake.score += self.score_c * self.scores[head[1]][head[0]] + 1
+            snake.length = self.scores[head[1]][head[0]] + 1
+            snake.growing = True
         else:
-            if len(self.snake.body) == self.snake.length:
-                self.snake.growing = False
+            if len(snake.body) == snake.length:
+                snake.growing = False
 
-        direction = self.snake.direction
+        direction = snake.direction
         if new_direction:
             direction = new_direction
 
@@ -67,17 +73,17 @@ class World:
             nxt = (head[0], head[1] - 1)
         elif direction == Direction.DOWN:
             nxt = (head[0], head[1] + 1)
-        self.snake.body.append(nxt)
-        if not self.snake.growing:
-            self.snake.body.pop(0)
-            self.snake.body.pop(0)
+        snake.body.append(nxt)
+        if not snake.growing:
+            snake.body.pop(0)
+            snake.body.pop(0)
 
     def start(self, ai):
         cursor.hide()
         os.system("clear")
-        print()
         while True:
             render(self)
-            self.snake.direction = ai.get_action()
-            self.move_snake()
+            for snake in self.snakes:
+                snake.direction = ai.get_action(snake)
+                self.move_snake(snake)
             time.sleep(0.5)

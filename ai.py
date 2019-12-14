@@ -13,11 +13,11 @@ class Ai:
                 j == -1 or
                 j == self.world.height)
 
-    def get_action(self):
+    def get_action(self, snake):
         res = ""
-        snake_dir = self.world.snake.direction
+        snake_dir = snake.direction
         while True:
-            head = self.world.snake.body[-1]
+            head = snake.get_head()
 
             if snake_dir == Direction.LEFT:
                 head = (head[0] - 1, head[1])

@@ -1,4 +1,5 @@
 from colored import fg, bg, attr
+from copy import deepcopy
 
 boxing = "┴┬│─┼└┘┐┌┤├"
 
@@ -8,8 +9,8 @@ def format(world):
 
     color_template = [
         ["white", "yellow", "yellow"],
-        ["green", "green", "green"],
-        ["green", "green", "green"],
+        ["white", "white", "white"],
+        ["white", "white", "white"],
     ]
 
     for row in world.scores:
@@ -20,21 +21,23 @@ def format(world):
                                      [" ", " ", str(score)],
                                      [" ", " ", " "],
                                      [" ", " ", " "],
-                                 ], color_template))
+                                 ], deepcopy(color_template)))
             else:
                 data_row.append(([
                                      [" ", str(int(score / 10)), str(score % 10)],
                                      [" ", " ", " "],
                                      [" ", " ", " "],
-                                 ], color_template))
+                                 ], deepcopy(color_template)))
         data.append(data_row)
 
-    for body in world.snake.body:
-        for i in range(2):
-            for j in range(3):
-                data[body[1]][body[0]][0][1 + i][j] = "█"
-    return data
+    for snake in world.snakes:
+        for body in snake.body:
+            for i in range(2):
+                for j in range(3):
+                    data[body[1]][body[0]][0][1 + i][j] = "█"
+                    data[body[1]][body[0]][1][1 + i][j] = snake.color
 
+    return data
 
 def render(world):
     data = format(world)
@@ -85,5 +88,7 @@ def render(world):
     for i in range(ww):
         print(boxing[3], end="")
     print(boxing[6])
-    print (world.snake.score)
+    for snake in world.snakes:
+        print ("%s%s%s" % (fg(snake.color), snake.score, attr("reset")), "\t", end="")
+    print()
     print("\033[%d;%dH" % (0, 0))
