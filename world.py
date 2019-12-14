@@ -49,6 +49,32 @@ class World:
         for i in range(self.snake_num):
             self.snakes.append(Snake(random.randint(0, self.width-1), random.randint(0, self.height-1), "rlud"[random.randint(0,3)], World.COLORS[i]))
 
+    def is_head_out(self, head):
+        i = head[0]
+        j = head[1]
+        return (i == -1 or
+                i == self.width or
+                j == -1 or
+                j == self.height)
+
+    def collision_bodies(self, head):
+        for snake in self.snakes:
+            for body in snake.body:
+                if body[0] == head[0] and body[1] == head[1]:
+                    return True
+        return False
+
+    def is_dead(self, snake):
+        for i in [-1, 0, 1]:
+            for j in [-1, 0, 1]:
+                if abs(i) + abs(j) != 1:
+                    continue
+                new_head = [snake.get_head()[0] + i, snake.get_head()[1] + j]
+                if not self.is_head_out(new_head) and not self.collision_bodies(new_head):
+                    return False
+        return True
+
+
     def move_snake(self, snake , new_direction=None):
 
         head = snake.get_head()
@@ -78,12 +104,50 @@ class World:
             snake.body.pop(0)
             snake.body.pop(0)
 
+    def fix_action(self, snake):
+        res = ""
+        snake_dir = snake.direction
+        while True:
+            head = snake.get_head()
+
+            if snake_dir == Direction.LEFT:
+                head = (head[0] - 1, head[1])
+                res = Direction.LEFT
+                snake_dir = Direction.UP
+            elif snake_dir == Direction.UP:
+                head = (head[0], head[1] - 1)
+                res = Direction.UP
+                snake_dir = Direction.RIGHT
+            elif snake_dir == Direction.RIGHT:
+                head = (head[0] + 1, head[1])
+                res = Direction.RIGHT
+                snake_dir = Direction.DOWN
+            elif snake_dir == Direction.DOWN:
+                head = (head[0], head[1] + 1)
+                res = Direction.DOWN
+                snake_dir = Direction.LEFT
+
+            if not self.is_head_out(head) and not self.collision_bodies(head):
+                break
+        return res
+
+
     def start(self, ai):
         cursor.hide()
         os.system("clear")
+        print()
         while True:
             render(self)
+            new_snakes = []
             for snake in self.snakes:
+                if self.is_dead(snake):
+                    continue;
                 snake.direction = ai.get_action(snake)
+                snake.direction = self.fix_action(snake)
                 self.move_snake(snake)
+                new_snakes.append(snake)
+
+            if len(new_snakes) == 0:
+                break;
+            self.snakes = new_snakes
             time.sleep(0.5)
