@@ -15,13 +15,14 @@ class Direction:
 
 class Snake:
 
-    def __init__(self, x, y, direction, color):
+    def __init__(self, snake_id, x, y, direction, color):
         self.body = [(x, y)]
         self.score = 0
         self.direction = direction
         self.length = 1
         self.growing = False
         self.color = color
+        self.snake_id = snake_id
 
     def get_head(self):
         return self.body[-1]
@@ -38,6 +39,7 @@ class World:
         self.snake_num = 3
 
         self.scores = []
+        self.table = {}
 
         for i in range(self.height):
             row = []
@@ -47,7 +49,7 @@ class World:
 
         self.snakes = []
         for i in range(self.snake_num):
-            self.snakes.append(Snake(random.randint(0, self.width-1), random.randint(0, self.height-1), "rlud"[random.randint(0,3)], World.COLORS[i]))
+            self.snakes.append(Snake(i, random.randint(0, self.width-1), random.randint(0, self.height-1), "rlud"[random.randint(0,3)], World.COLORS[i]))
 
     def is_head_out(self, head):
         i = head[0]
@@ -56,6 +58,10 @@ class World:
                 i == self.width or
                 j == -1 or
                 j == self.height)
+
+    def update_table(self):
+        for snake in self.snakes:
+            self.table[snake.snake_id] = (snake.color, snake.score)
 
     def collision_bodies(self, head):
         for snake in self.snakes:
@@ -150,4 +156,5 @@ class World:
             if len(new_snakes) == 0:
                 break;
             self.snakes = new_snakes
+            self.update_table()
             time.sleep(0.5)

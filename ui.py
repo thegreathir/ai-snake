@@ -36,6 +36,11 @@ def format(world):
                 for j in range(3):
                     data[body[1]][body[0]][0][1 + i][j] = "█"
                     data[body[1]][body[0]][1][1 + i][j] = snake.color
+        body = snake.get_head()
+        for i in range(2):
+            for j in range(3):
+                data[body[1]][body[0]][0][1 + i][j] = "█"
+                data[body[1]][body[0]][1][1 + i][j] = "light_" + snake.color
 
     return data
 
@@ -88,7 +93,7 @@ def render(world):
     for i in range(ww):
         print(boxing[3], end="")
     print(boxing[6])
-    for snake in world.snakes:
-        print ("%s%s%s" % (fg(snake.color), snake.score, attr("reset")), "\t", end="")
+    for snake_id, score in world.table.items():
+        print ("%s%s%s" % (fg("light_" + score[0]), score[1], attr("reset")), "\t", end="")
     print()
     print("\033[%d;%dH" % (0, 0))
