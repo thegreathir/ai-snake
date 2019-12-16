@@ -30,6 +30,7 @@ class Snake:
 
 class World:
     COLORS = ["red", "green", "blue", "magneta", "cyan"]
+
     def __init__(self):
         self.height = 12
         self.width = 40
@@ -37,7 +38,7 @@ class World:
         self.max_score = 15
         self.score_c = 5
         self.snake_num = 1
-        self.cycles = 100
+        self.cycles = 1000
         self.cycle = 0
 
         self.scores = []
@@ -51,7 +52,8 @@ class World:
 
         self.snakes = []
         for i in range(self.snake_num):
-            self.snakes.append(Snake(i, random.randint(0, self.width-1), random.randint(0, self.height-1), "rlud"[random.randint(0,3)], World.COLORS[i]))
+            self.snakes.append(Snake(i, random.randint(0, self.width - 1), random.randint(0, self.height - 1),
+                                     "rlud"[random.randint(0, 3)], World.COLORS[i]))
 
     def is_head_out(self, head):
         i = head[0]
@@ -82,8 +84,7 @@ class World:
                     return False
         return True
 
-
-    def move_snake(self, snake , new_direction=None):
+    def move_snake(self, snake, new_direction=None):
 
         head = snake.get_head()
         if len(snake.body) == 1:
@@ -139,15 +140,16 @@ class World:
                 break
         return res
 
-
-    def start(self, ai):
-        cursor.hide()
-        os.system("clear")
-        print()
+    def start(self, ai, simulation_mode=False):
+        if not simulation_mode:
+            cursor.hide()
+            os.system("clear")
+            print()
         while True:
             if self.cycle > self.cycles:
                 break
-            render(self)
+            if not simulation_mode:
+                render(self)
             new_snakes = []
             for snake in self.snakes:
                 if self.is_dead(snake):
@@ -162,5 +164,10 @@ class World:
             self.snakes = new_snakes
             self.update_table()
             self.cycle = self.cycle + 1
-            time.sleep(0.5)
-        input()
+            if not simulation_mode:
+                time.sleep(0.5)
+        if not simulation_mode:
+            input()
+        else:
+            for snake in self.snakes:
+                print(snake.score)
