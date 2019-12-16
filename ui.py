@@ -51,6 +51,7 @@ def render(world):
     hh = len(data[0][0][0])
     ww = len(data[0][0][0][0])
 
+    print(world.cycle)
     print(boxing[8], end="")
     for i in range(m - 1):
         for i in range(ww):

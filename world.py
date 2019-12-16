@@ -36,7 +36,9 @@ class World:
         self.min_score = 1
         self.max_score = 15
         self.score_c = 5
-        self.snake_num = 3
+        self.snake_num = 1
+        self.cycles = 100
+        self.cycle = 0
 
         self.scores = []
         self.table = {}
@@ -143,18 +145,22 @@ class World:
         os.system("clear")
         print()
         while True:
+            if self.cycle > self.cycles:
+                break
             render(self)
             new_snakes = []
             for snake in self.snakes:
                 if self.is_dead(snake):
-                    continue;
+                    continue
                 snake.direction = ai.get_action(snake)
                 snake.direction = self.fix_action(snake)
                 self.move_snake(snake)
                 new_snakes.append(snake)
 
             if len(new_snakes) == 0:
-                break;
+                break
             self.snakes = new_snakes
             self.update_table()
+            self.cycle = self.cycle + 1
             time.sleep(0.5)
+        input()
