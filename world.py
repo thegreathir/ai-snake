@@ -38,7 +38,7 @@ class World:
         self.max_score = 15
         self.score_c = 5
         self.snake_num = 1
-        self.cycles = 1000
+        self.cycles = 300
         self.cycle = 0
 
         self.scores = []
@@ -170,4 +170,4 @@ class World:
             input()
         else:
             for snake in self.snakes:
-                print(snake.score)
+                print(snake.score, self.cycle)
