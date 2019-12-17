@@ -12,6 +12,9 @@ class Direction:
     UP = "u"
     DOWN = "d"
 
+    def get_all():
+        return [Direction.UP, Direction.RIGHT, Direction.LEFT, Direction.DOWN]
+
 
 class Snake:
 

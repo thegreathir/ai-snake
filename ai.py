@@ -1,4 +1,5 @@
 from dls import get_dls_action
+from gs import get_gs_action
 from world import *
 import random
 
@@ -14,4 +15,5 @@ class Ai:
         self.world = world
 
     def get_action(self, snake):
-        return get_dls_action(self.world, snake)
+        #    return get_dls_action(self.world, snake)
+        return get_gs_action(self.world, snake)
