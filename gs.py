@@ -7,7 +7,7 @@ import json
 import logging
 
 logging.basicConfig(filename='gs.log', level=logging.DEBUG)
-logger = logging.getLogger('GS')
+# logger = logging.getLogger('GS')
 
 
 class SnakeWrapper(Snake):
@@ -124,11 +124,11 @@ class GS:
         goal_state = self.build_path_to_goal()
 
         if not goal_state:
-            logger.debug("goal_state is None")
-            logger.debug("snake len is: %d", len(
-                self.current_state.snake.body))
-            logger.debug("failed target %s with score: %d",
-                         str(self.target), self.current_state.world.scores[self.target[1]][self.target[0]])
+            # logger.debug("goal_state is None")
+            # logger.debug("snake len is: %d", len(
+                # self.current_state.snake.body))
+            # logger.debug("failed target %s with score: %d",
+                         # str(self.target), self.current_state.world.scores[self.target[1]][self.target[0]])
             return None
 
         tmp = goal_state
@@ -151,11 +151,11 @@ def find_goals(world, snake):
 
 
 def get_gs_action(world, snake):
-    logger.debug("-------------------------------------------")
+    # logger.debug("-------------------------------------------")
     goals = find_goals(world, snake)
-    logger.debug("goals are: %s", str(goals))
+    # logger.debug("goals are: %s", str(goals))
     current_state = State(world, None, None, snake, 0)
-    logger.debug("head is at: %s", str(current_state.snake.get_head()))
+    # logger.debug("head is at: %s", str(current_state.snake.get_head()))
 
     res = None
     for target in goals:
