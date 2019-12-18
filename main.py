@@ -7,3 +7,10 @@ if __name__ == "__main__":
     ai = Ai(world)
     simulation_mode = sys.argv.count("-s") == 1
     world.start(ai, simulation_mode)
+
+# todo
+# amount
+# min max
+# turn and agent
+# worm body
+# growing coloring
