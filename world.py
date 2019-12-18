@@ -1,12 +1,11 @@
 import json
 import random
 import time
-
 import cursor
 import os
 
 from ui import render
-
+from bait_generator import BaitGenerator
 
 class Direction:
     RIGHT = "r"
@@ -57,11 +56,8 @@ class World:
         if config_file != None:
             self.load_config(config_file)
 
-        for i in range(self.height):
-            row = []
-            for j in range(self.width):
-                row.append(random.randint(self.min_score, self.max_score))
-            self.scores.append(row)
+        bg = BaitGenerator(self.width, self.height, "mapfile.txt")
+        self.scores = bg.get_scores()
 
         self.snakes = []
         for i in range(self.snake_num):
