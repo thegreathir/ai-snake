@@ -79,7 +79,6 @@ def next_state(old_state, action):
     head = state.snake[-1]
     if len(state.snake) == 1:
         state.catch_count = state.catch_count + 1
-        state.score += state.world.score_c * state.world_scores[head[1]][head[0]] + 1
         state.length = state.world_scores[head[1]][head[0]] + 1
         state.growing = True
     else:
