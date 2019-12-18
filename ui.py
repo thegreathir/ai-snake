@@ -16,7 +16,13 @@ def format(world):
     for row in world.scores:
         data_row = []
         for score in row:
-            if score < 10:
+            if score == 0:
+                data_row.append(([
+                                     [" ", " ", " "],
+                                     [" ", " ", " "],
+                                     [" ", " ", " "],
+                                 ], deepcopy(color_template)))
+            elif score < 10:
                 data_row.append(([
                                      [" ", " ", str(score)],
                                      [" ", " ", " "],
@@ -43,6 +49,7 @@ def format(world):
                 data[body[1]][body[0]][1][1 + i][j] = "light_" + snake.color
 
     return data
+
 
 def render(world):
     data = format(world)

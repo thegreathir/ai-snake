@@ -15,5 +15,6 @@ class Ai:
         self.world = world
 
     def get_action(self, snake):
-        #    return get_dls_action(self.world, snake)
-        return get_gs_action(self.world, snake)
+        return get_random_action()
+        # return get_dls_action(self.world, snake)
+        # return get_gs_action(self.world, snake)

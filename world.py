@@ -1,5 +1,6 @@
 import random
 import time
+
 import cursor
 import os
 
@@ -12,6 +13,7 @@ class Direction:
     UP = "u"
     DOWN = "d"
 
+    @staticmethod
     def get_all():
         return [Direction.UP, Direction.RIGHT, Direction.LEFT, Direction.DOWN]
 
@@ -35,14 +37,18 @@ class World:
     COLORS = ["red", "green", "blue", "magneta", "cyan"]
 
     def __init__(self):
+        self.target_score = 500
         self.height = 12
         self.width = 40
-        self.min_score = 1
-        self.max_score = 15
-        self.score_c = 5
+        self.min_score = 0
+        self.max_score = 9
+        self.score_c = 10
         self.snake_num = 1
-        self.cycles = 300
+        self.cycles = 1000
         self.cycle = 0
+        self.eat_score = 5
+        self.turn_cost = 1
+        self.persist_score = False
 
         self.scores = []
         self.table = {}
@@ -91,15 +97,21 @@ class World:
 
         head = snake.get_head()
         if len(snake.body) == 1:
-            snake.score += self.score_c * self.scores[head[1]][head[0]] + 1
-            snake.length = self.scores[head[1]][head[0]] + 1
-            snake.growing = True
+            if self.scores[head[1]][head[0]] != 0:
+                snake.score += self.score_c * self.scores[head[1]][head[0]] + self.eat_score
+                snake.length = self.scores[head[1]][head[0]] + 1
+                if not self.persist_score:
+                    self.scores[head[1]][head[0]] = 0
+                snake.growing = True
         else:
             if len(snake.body) == snake.length:
                 snake.growing = False
 
         direction = snake.direction
         if new_direction:
+            if snake.direction != new_direction:
+                snake.score -= self.turn_cost
+                snake.score = max(0, snake.score)
             direction = new_direction
 
         nxt = None
@@ -114,11 +126,12 @@ class World:
         snake.body.append(nxt)
         if not snake.growing:
             snake.body.pop(0)
-            snake.body.pop(0)
+            if len(snake.body) > 1:
+                snake.body.pop(0)
+        snake.direction = direction
 
-    def fix_action(self, snake):
+    def fix_action(self, snake, snake_dir):
         res = ""
-        snake_dir = snake.direction
         while True:
             head = snake.get_head()
 
@@ -151,15 +164,16 @@ class World:
         while True:
             if self.cycle > self.cycles:
                 break
+
             if not simulation_mode:
                 render(self)
             new_snakes = []
             for snake in self.snakes:
                 if self.is_dead(snake):
                     continue
-                snake.direction = ai.get_action(snake)
-                snake.direction = self.fix_action(snake)
-                self.move_snake(snake)
+                new_dir = ai.get_action(snake)
+                fixed_dir = self.fix_action(snake, new_dir)
+                self.move_snake(snake, fixed_dir)
                 new_snakes.append(snake)
 
             if len(new_snakes) == 0:
@@ -167,9 +181,17 @@ class World:
             self.snakes = new_snakes
             self.update_table()
             self.cycle = self.cycle + 1
+
+            max_score = max(map(lambda x: x.score, self.snakes))
+
+            if max_score >= self.target_score:
+                render(self)
+                break
+
             if not simulation_mode:
-                time.sleep(0.5)
+                time.sleep(0.25)
         if not simulation_mode:
+            print('end')
             input()
         else:
             for snake in self.snakes:
