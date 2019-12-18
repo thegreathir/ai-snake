@@ -1,3 +1,4 @@
+import json
 import random
 import time
 
@@ -36,7 +37,7 @@ class Snake:
 class World:
     COLORS = ["red", "green", "blue", "magneta", "cyan"]
 
-    def __init__(self):
+    def __init__(self, config_file=None):
         self.target_score = 500
         self.height = 12
         self.width = 40
@@ -44,7 +45,7 @@ class World:
         self.max_score = 9
         self.score_c = 10
         self.snake_num = 1
-        self.cycles = 1000
+        self.max_cycles = 1000
         self.cycle = 0
         self.eat_score = 5
         self.turn_cost = 1
@@ -52,6 +53,9 @@ class World:
 
         self.scores = []
         self.table = {}
+
+        if config_file != None:
+            self.load_config(config_file)
 
         for i in range(self.height):
             row = []
@@ -162,7 +166,7 @@ class World:
             os.system("clear")
             print()
         while True:
-            if self.cycle > self.cycles:
+            if self.cycle > self.max_cycles:
                 break
 
             if not simulation_mode:
@@ -196,3 +200,18 @@ class World:
         else:
             for snake in self.snakes:
                 print(snake.score, self.cycle)
+
+    def load_config(self, config_file):
+        f = open(config_file, "r")
+        json_config = json.loads(f.read())
+        self.target_score = json_config.get("target_score", self.target_score)
+        self.height = json_config.get("height", self.height)
+        self.width = json_config.get("width", self.width)
+        self.min_score = json_config.get("min_score", self.min_score)
+        self.max_score = json_config.get("max_score", self.max_score)
+        self.score_c = json_config.get("a", self.score_c)
+        self.snake_num = json_config.get("snake_num", self.snake_num)
+        self.max_cycles = json_config.get("max_cycles", self.max_cycles)
+        self.eat_score = json_config.get("b", self.eat_score)
+        self.turn_cost = json_config.get("turn_cost", self.turn_cost)
+        self.persist_score = json_config.get("persist_score", self.persist_score)
