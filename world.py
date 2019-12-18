@@ -53,7 +53,7 @@ class World:
         self.scores = []
         self.table = {}
 
-        if config_file != None:
+        if config_file is not None:
             self.load_config(config_file)
 
         bg = BaitGenerator(self.width, self.height, "mapfile.txt")
@@ -193,7 +193,6 @@ class World:
             if not simulation_mode:
                 time.sleep(0.25)
         if not simulation_mode:
-            print('end')
             input()
         else:
             for snake in self.snakes:
