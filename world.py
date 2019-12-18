@@ -172,6 +172,7 @@ class World:
                 if self.is_dead(snake):
                     continue
                 new_dir = ai.get_action(snake)
+                # todo die
                 fixed_dir = self.fix_action(snake, new_dir)
                 self.move_snake(snake, fixed_dir)
                 new_snakes.append(snake)
@@ -185,7 +186,8 @@ class World:
             max_score = max(map(lambda x: x.score, self.snakes))
 
             if max_score >= self.target_score:
-                render(self)
+                if not simulation_mode:
+                    render(self)
                 break
 
             if not simulation_mode:
