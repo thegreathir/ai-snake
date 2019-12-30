@@ -49,9 +49,9 @@ class World:
         self.eat_score = 5
         self.turn_cost = 1
         self.persist_score = False
-
         self.scores = []
         self.table = {}
+        self.last_id = 0
 
         if config_file is not None:
             self.load_config(config_file)
@@ -60,9 +60,7 @@ class World:
         self.scores = bg.get_scores()
 
         self.snakes = []
-        for i in range(self.snake_num):
-            self.snakes.append(Snake(i, random.randint(0, self.width - 1), random.randint(0, self.height - 1),
-                                     "rlud"[random.randint(0, 3)], World.COLORS[i]))
+        self.agents = {}
 
     def is_head_out(self, head):
         i = head[0]
@@ -156,42 +154,47 @@ class World:
                 break
         return res
 
-    def start(self, ai, simulation_mode=False):
+    def tick(self, simulation_mode):
+        if self.cycle > self.max_cycles:
+            return False
+
+        if not simulation_mode:
+            render(self)
+        new_snakes = []
+        for snake in self.snakes:
+            if self.is_dead(snake):
+                continue
+            new_dir = self.agents[snake.snake_id].get_action(self)
+            # todo die
+            fixed_dir = self.fix_action(snake, new_dir)
+            self.move_snake(snake, fixed_dir)
+            new_snakes.append(snake)
+
+        if len(new_snakes) == 0:
+            return False
+        self.snakes = new_snakes
+        self.update_table()
+        self.cycle = self.cycle + 1
+
+        max_score = max(map(lambda x: x.score, self.snakes))
+
+        if max_score >= self.target_score:
+            if not simulation_mode:
+                render(self)
+            return False
+
+        if not simulation_mode:
+            time.sleep(0.25)
+        return True
+
+    def start(self, simulation_mode=False):
         if not simulation_mode:
             cursor.hide()
             os.system("clear")
             print()
         while True:
-            if self.cycle > self.max_cycles:
+            if not self.tick(simulation_mode):
                 break
-
-            if not simulation_mode:
-                render(self)
-            new_snakes = []
-            for snake in self.snakes:
-                if self.is_dead(snake):
-                    continue
-                new_dir = ai.get_action(snake)
-                # todo die
-                fixed_dir = self.fix_action(snake, new_dir)
-                self.move_snake(snake, fixed_dir)
-                new_snakes.append(snake)
-
-            if len(new_snakes) == 0:
-                break
-            self.snakes = new_snakes
-            self.update_table()
-            self.cycle = self.cycle + 1
-
-            max_score = max(map(lambda x: x.score, self.snakes))
-
-            if max_score >= self.target_score:
-                if not simulation_mode:
-                    render(self)
-                break
-
-            if not simulation_mode:
-                time.sleep(0.25)
         if not simulation_mode:
             input()
         else:
@@ -212,3 +215,12 @@ class World:
         self.eat_score = json_config.get("b", self.eat_score)
         self.turn_cost = json_config.get("turn_cost", self.turn_cost)
         self.persist_score = json_config.get("persist_score", self.persist_score)
+
+    def register(self, agent):
+        new_id = self.last_id
+        self.last_id = self.last_id + 1
+        self.agents[new_id] = agent
+
+        self.snakes.append(Snake(new_id, random.randint(0, self.width - 1), random.randint(0, self.height - 1),
+                                 "rlud"[random.randint(0, 3)], World.COLORS[new_id % len(World.COLORS)]))
+        return new_id

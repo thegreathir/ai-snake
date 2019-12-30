@@ -1,12 +1,12 @@
 from world import World
-from ai import Ai
+from agent import Agent
 import sys
 
 if __name__ == "__main__":
     world = World("config.json")
-    ai = Ai(world)
+    agent = Agent(world)
     simulation_mode = sys.argv.count("-s") == 1
-    world.start(ai, simulation_mode)
+    world.start(simulation_mode)
 
 # todo
 # amount

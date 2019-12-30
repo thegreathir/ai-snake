@@ -123,5 +123,3 @@ def render(world):
         print("%s%s%s" % (fg("light_" + score[0]), score[1], attr("reset")), "\t", end="")
     print()
     print("\033[%d;%dH" % (0, 0))
-
-print([(i, v) for i, v in enumerate(boxing)])

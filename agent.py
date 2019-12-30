@@ -9,12 +9,11 @@ def get_random_action():
     return [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT][act_int - 1]
 
 
-class Ai:
+class Agent:
 
     def __init__(self, world):
-        self.world = world
+        self.snake_id = world.register(self)
 
-    def get_action(self, snake):
-        return get_random_action()
-        # return get_dls_action(self.world, snake)
+    def get_action(self, world):
+        return get_dls_action(world, world.snakes[self.snake_id])
         # return get_gs_action(self.world, snake)
