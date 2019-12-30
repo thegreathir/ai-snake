@@ -15,5 +15,6 @@ class Agent:
         self.snake_id = world.register(self)
 
     def get_action(self, world):
-        return get_dls_action(world, world.snakes[self.snake_id])
+        return get_random_action()
+        #return get_dls_action(world, world.snakes[self.snake_id])
         # return get_gs_action(self.world, snake)
