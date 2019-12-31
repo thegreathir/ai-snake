@@ -227,9 +227,9 @@ class World:
         res["snakes"] = []
 
         for snake in self.snakes:
-            res["snakes"].append([])
+            res["snakes"].append({"id":snake.snake_id, "length":snake.length, "growing":snake.growing, "body":[]})
             for body in snake.body:
-                res["snakes"][-1].append({"x":body[0], "y":body[1]})
+                res["snakes"][-1]["body"].append({"x":body[0], "y":body[1]})
 
 
         return json.dumps(res)

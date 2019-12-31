@@ -4,7 +4,7 @@ project(cppagent)
 set (CMAKE_CXX_STANDARD 14)
 
 find_package(PythonLibs 3 REQUIRED)
-find_package(Boost COMPONENTS python37)
+find_package(Boost COMPONENTS python3)
 
 include_directories(${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
 
