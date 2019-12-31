@@ -43,7 +43,6 @@ class World:
         self.min_score = 0
         self.max_score = 9
         self.score_c = 10
-        self.snake_num = 1
         self.max_cycles = 1000
         self.cycle = 0
         self.eat_score = 5
@@ -210,7 +209,6 @@ class World:
         self.min_score = json_config.get("min_score", self.min_score)
         self.max_score = json_config.get("max_score", self.max_score)
         self.score_c = json_config.get("a", self.score_c)
-        self.snake_num = json_config.get("snake_num", self.snake_num)
         self.max_cycles = json_config.get("max_cycles", self.max_cycles)
         self.eat_score = json_config.get("b", self.eat_score)
         self.turn_cost = json_config.get("turn_cost", self.turn_cost)
