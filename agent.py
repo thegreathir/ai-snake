@@ -2,7 +2,7 @@ from dls import get_dls_action
 from gs import get_gs_action
 from world import *
 import random
-
+from cpp import cppagent
 
 def get_random_action():
     act_int = random.randint(1, 4)
@@ -15,6 +15,4 @@ class Agent:
         self.snake_id = world.register(self)
 
     def get_action(self, world):
-        return get_random_action()
-        #return get_dls_action(world, world.snakes[self.snake_id])
-        # return get_gs_action(self.world, snake)
+        return cppagent.get_action(world.to_json())

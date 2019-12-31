@@ -214,6 +214,26 @@ class World:
         self.turn_cost = json_config.get("turn_cost", self.turn_cost)
         self.persist_score = json_config.get("persist_score", self.persist_score)
 
+    def to_json(self):
+        res = dict()
+        res["height"] = self.height
+        res["width"] = self.width
+        res["scores"] = []
+
+        for row in self.scores:
+            for i in row:
+                res["scores"].append(i)
+
+        res["snakes"] = []
+
+        for snake in self.snakes:
+            res["snakes"].append([])
+            for body in snake.body:
+                res["snakes"][-1].append({"x":body[0], "y":body[1]})
+
+
+        return json.dumps(res)
+
     def register(self, agent):
         new_id = self.last_id
         self.last_id = self.last_id + 1

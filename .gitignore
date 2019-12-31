@@ -218,3 +218,4 @@ pip-selfcheck.json
 # End of https://www.gitignore.io/api/python,pycharm,virtualenv
 *.log
 
+cpp/build
