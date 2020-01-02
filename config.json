@@ -1,9 +1,9 @@
 {
  "target_score": 500,
- "height": 14,
- "width": 28,
- "min_score": 0,
- "max_score": 0,
+ "height": 15,
+ "width": 45,
+ "min_score": 1,
+ "max_score": 10,
  "a": 10,
  "b": 5,
  "max_cycles": 1000,

@@ -56,7 +56,7 @@ class World:
             self.load_config(config_file)
 
         bg = BaitGenerator(self.width, self.height, "mapfile.txt")
-        self.scores = bg.get_scores()
+        self.scores = bg.get_random(self.min_score, self.max_score)
 
         self.snakes = []
         self.agents = {}
@@ -214,7 +214,7 @@ class World:
         self.turn_cost = json_config.get("turn_cost", self.turn_cost)
         self.persist_score = json_config.get("persist_score", self.persist_score)
 
-    def to_json(self):
+    def to_json(self, snake_id):
         res = dict()
         res["height"] = self.height
         res["width"] = self.width
@@ -227,10 +227,13 @@ class World:
         res["snakes"] = []
 
         for snake in self.snakes:
-            res["snakes"].append({"id":snake.snake_id, "length":snake.length, "growing":snake.growing, "body":[]})
+            res["snakes"].append({"id":snake.snake_id, "length":snake.length,
+                "growing":snake.growing, "body":[]})
             for body in snake.body:
                 res["snakes"][-1]["body"].append({"x":body[0], "y":body[1]})
 
+        res["my_snake_id"] = snake_id
+        res["opp_snake_id"] = list(set(range(len(self.snakes))) - {snake_id})[0]
 
         return json.dumps(res)
 

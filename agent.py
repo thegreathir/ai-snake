@@ -15,4 +15,12 @@ class Agent:
         self.snake_id = world.register(self)
 
     def get_action(self, world):
-        return cppagent.get_action(world.to_json())
+        return cppagent.get_action(world.to_json(self.snake_id))
+
+class RandomAgent:
+
+    def __init__(self, world):
+        world.register(self)
+
+    def get_action(self, world):
+        return get_random_action()
