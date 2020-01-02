@@ -106,7 +106,7 @@ bool is_head_out(int width, int height, const Point& head) {
 bool collision_bodies(const std::vector<Snake>& snakes, const Point& head) {
     for (auto&& snake : snakes) {
         for (auto&& body : snake.body)
-            if (x(body) == x(head) and y(body) == y(head))
+            if (x(body) == x(head) && y(body) == y(head))
                 return true;
         return false;
     }
