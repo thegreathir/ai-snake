@@ -108,8 +108,8 @@ bool collision_bodies(const std::vector<Snake>& snakes, const Point& head) {
         for (auto&& body : snake.body)
             if (x(body) == x(head) && y(body) == y(head))
                 return true;
-        return false;
     }
+    return false;
 }
 
 bool is_dead(const State& state, int snake_id) {
