@@ -6,27 +6,49 @@
 
 namespace alphabeta {
 
-using Point = std::pair<int, int>;
+class Point {
+    std::pair<int, int> coordinates;
+public:
+    int x() const {
+        return coordinates.first;
+    }
+    int y() const {
+        return coordinates.second;
+    }
+    Point(int x, int y)
+    : coordinates(x, y)
+    {}
+};
 
-struct Snake {
+class Snake {
+public:
     int id;
     std::vector<Point> body;
     std::size_t length;
     bool growing;
 
-    struct MetaData {
+    class MetaData {
+    public:
         int eat_count;
+        explicit MetaData(int eat_count)
+        : eat_count(eat_count)
+        {}
+
     };
     MetaData data;
+
+    const Point& get_head() const {
+        return body.back();
+    }
+
+    Snake(int id, std::size_t length, bool growing, const MetaData& meta_data)
+    : id(id)
+    , length(length)
+    , growing(growing)
+    , data(meta_data)
+    {
+    }
 };
-
-int x(const Point& p) {
-    return p.first;
-}
-
-int y(const Point& p) {
-    return p.second;
-}
 
 enum class Direction {
     LEFT,
@@ -66,10 +88,12 @@ public:
 
     MetaData data;
 
-    void from_json(const nlohmann::json& world_json) {
-        this->height = world_json["height"];
-        this->width = world_json["width"];
-
+    State(const nlohmann::json& world_json)
+    : width(world_json["width"])
+    , height(world_json["height"])
+    , my_snake_id(world_json["my_snake_id"])
+    , opp_snake_id(world_json["opp_snake_id"])
+    {
         for (int h = 0; h < this->height; ++h) {
             this->scores.emplace_back();
             for (int w = 0; w < this->width; ++w)
@@ -77,111 +101,107 @@ public:
         }
 
         for (auto&& snake : world_json["snakes"]) {
-            this->snakes.push_back({snake["id"], {}, snake["length"],
-                    snake["growing"], {0}});
+            this->snakes.emplace_back(snake["id"], snake["length"], snake["growing"],
+                    Snake::MetaData(0));
             for (auto&& body : snake["body"]) {
                 this->snakes.back().body.emplace_back(body["x"], body["y"]);
             }
         }
 
-        this->my_snake_id = world_json["my_snake_id"];
-        this->opp_snake_id = world_json["opp_snake_id"];
     }
 
-};
-
-const Point& get_head(const Snake& snake) {
-    return snake.body.back();
-}
-
-bool is_head_out(int width, int height, const Point& head) {
-    int i = x(head);
-    int j = y(head);
-    return (i == -1 ||
-            i == width ||
-            j == -1 ||
-            j == height);
-}
-
-bool collision_bodies(const std::vector<Snake>& snakes, const Point& head) {
-    for (auto&& snake : snakes) {
-        for (auto&& body : snake.body)
-            if (x(body) == x(head) && y(body) == y(head))
-                return true;
+    bool is_head_out(const Point& head) const {
+        int i = head.x();
+        int j = head.y();
+        return (i == -1 ||
+                i == width ||
+                j == -1 ||
+                j == height);
     }
-    return false;
-}
 
-bool is_dead(const State& state, int snake_id) {
-    constexpr std::array<int, 3> direction = {-1, 0, 1};
-    for (int i : direction)
-        for (int j : direction) {
-            if (std::abs(i) + std::abs(j) != 1)
-                continue;
-            auto new_head = Point{x(get_head(state.snakes[snake_id])) + i,
-                y(get_head(state.snakes[snake_id])) + j};
-
-            if (!is_head_out(state.width, state.height, new_head) &&
-                    !collision_bodies(state.snakes, new_head))
-                return false;
+    bool collision_bodies(const Point& head) const {
+        for (auto&& snake : snakes) {
+            for (auto&& body : snake.body)
+                if (body.x() == head.x() && body.y() == head.y())
+                    return true;
         }
-    return true;
-}
-
-auto get_next_head(const Point& head, const Direction& action) {
-    Point new_head{0, 0};
-    switch(action) {
-        case Direction::LEFT:
-            new_head = Point{x(head) - 1, y(head)};
-            break;
-        case Direction::RIGHT:
-            new_head = Point{x(head) + 1, y(head)};
-            break;
-        case Direction::DOWN:
-            new_head = Point{x(head), y(head) + 1};
-            break;
-        case Direction::UP:
-            new_head = Point{x(head), y(head) - 1};
-            break;
+        return false;
     }
-    return new_head;
-}
 
-bool is_action_available(const State& state, int snake_id, const Direction& action) {
-    auto&& head = get_head(state.snakes[snake_id]);
-    Point new_head = get_next_head(head, action);
-    return !is_head_out(state.width, state.height, head)
-        && !collision_bodies(state.snakes, new_head);
-}
+    bool is_dead(int snake_id) const {
+        constexpr std::array<int, 3> direction = {-1, 0, 1};
+        for (int i : direction)
+            for (int j : direction) {
+                if (std::abs(i) + std::abs(j) != 1)
+                    continue;
+                auto new_head = Point{snakes[snake_id].get_head().x() + i,
+                                      snakes[snake_id].get_head().y() + j};
 
-auto get_available_actions(const State& state, int snake_id) {
-    constexpr std::array<Direction, 4> directions = {Direction::LEFT,
-        Direction::RIGHT, Direction::UP, Direction::DOWN};
-    std::vector<Direction> res;
-    for (auto&& act : directions)
-        if (is_action_available(state, snake_id, act))
-            res.emplace_back(act);
-    return res;
-}
+                if (!is_head_out(new_head) &&
+                    !collision_bodies(new_head))
+                    return false;
+            }
+        return true;
+    }
+
+    static auto get_next_head(const Point& head, const Direction& action) {
+        Point new_head{0, 0};
+        switch (action) {
+            case Direction::LEFT:
+                new_head = Point{head.x() - 1, head.y()};
+                break;
+            case Direction::RIGHT:
+                new_head = Point{head.x() + 1, head.y()};
+                break;
+            case Direction::DOWN:
+                new_head = Point{head.x(), head.y() + 1};
+                break;
+            case Direction::UP:
+                new_head = Point{head.x(), head.y() - 1};
+                break;
+            default:
+                new_head = head;
+                break;
+        }
+        return new_head;
+    }
+
+    bool is_action_available(int snake_id, const Direction& action) const {
+        auto&& head = snakes[snake_id].get_head();
+        Point new_head = get_next_head(head, action);
+        return !is_head_out(head)
+               && !collision_bodies(new_head);
+    }
+
+    auto get_available_actions(int snake_id) const {
+        constexpr std::array<Direction, 4> directions = {Direction::LEFT,
+                                                         Direction::RIGHT, Direction::UP, Direction::DOWN};
+        std::vector<Direction> res;
+        for (auto&& act : directions)
+            if (is_action_available(snake_id, act))
+                res.emplace_back(act);
+        return res;
+    }
+};
 
 auto next_state(const State& state, int snake_id, const Direction& action) {
     auto new_state = state;
 
     auto& snake = new_state.snakes[snake_id];
-    auto&& head = get_head(snake);
+    auto&& head = snake.get_head();
 
     if (snake.body.size() == 1) {
-        if (new_state.scores[y(head)][x(head)] != 0) {
-            snake.length = new_state.scores[y(head)][x(head)];
+        if (new_state.scores[head.y()][head.x()] != 0) {
+            snake.length = new_state.scores[head.y()][head.x()];
             snake.data.eat_count += 1;
-            new_state.scores[y(head)][x(head)] = 0;
+            new_state.scores[head.y()][head.x()] = 0;
             snake.growing = true;
         }
     } else
         if (snake.body.size() == snake.length)
             snake.growing = false;
 
-    auto new_head = get_next_head(head, action);
+    auto new_head = alphabeta::State::get_next_head(head, action);
     snake.body.push_back(new_head);
     if (!snake.growing) {
         snake.body.erase(snake.body.begin());
@@ -201,7 +221,7 @@ std::pair<double, Direction> alphabeta(const State& state, int depth, double alp
         bool my_turn) {
     int snake_id = my_turn ? state.my_snake_id : state.opp_snake_id; 
 
-    if (is_dead(state, snake_id)) {
+    if (state.is_dead(snake_id)) {
         if (my_turn) {
             return std::make_pair(-std::numeric_limits<double>::infinity(), Direction::NONE);
         } else {
@@ -215,7 +235,7 @@ std::pair<double, Direction> alphabeta(const State& state, int depth, double alp
     if (my_turn) {
         double value = -std::numeric_limits<double>::infinity();
         Direction action = Direction::NONE;
-        for (auto&& candidate : get_available_actions(state, snake_id)) {
+        for (auto&& candidate : state.get_available_actions(snake_id)) {
             double new_val = 0;
             std::tie(new_val, std::ignore) = alphabeta(next_state(state, snake_id, candidate),
                     depth - 1, alpha, beta, false);
@@ -233,7 +253,7 @@ std::pair<double, Direction> alphabeta(const State& state, int depth, double alp
     } else {
         double value = std::numeric_limits<double>::infinity();
         Direction action = Direction::NONE;
-        for (auto&& candidate : get_available_actions(state, snake_id)) {
+        for (auto&& candidate : state.get_available_actions(snake_id)) {
             double new_val = 0;
             std::tie(new_val, std::ignore) = alphabeta(next_state(state, snake_id, candidate),
                     depth - 1, alpha, beta, true);
@@ -251,11 +271,10 @@ std::pair<double, Direction> alphabeta(const State& state, int depth, double alp
     }
 }
 
-char get_action(std::string world_json) {
-    auto world = nlohmann::json::parse(world_json);
+char get_action(const std::string& world_json_string) {
+    auto world_json = nlohmann::json::parse(world_json_string);
 
-    State state;
-    state.from_json(world);
+    State state(world_json);
     Direction action = Direction::NONE;
     constexpr int depth = 13;
     std::tie(std::ignore, action) = alphabeta(state, depth, -std::numeric_limits<double>::infinity(),
