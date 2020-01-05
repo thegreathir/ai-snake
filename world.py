@@ -1,6 +1,7 @@
 import json
 import random
 import time
+import datetime
 import cursor
 import os
 
@@ -51,6 +52,7 @@ class World:
         self.scores = []
         self.table = {}
         self.last_id = 0
+        self.interval = 1000
 
         if config_file is not None:
             self.load_config(config_file)
@@ -154,6 +156,7 @@ class World:
         return res
 
     def tick(self, simulation_mode):
+        start_point = datetime.datetime.now()
         if self.cycle > self.max_cycles:
             return False
 
@@ -183,7 +186,10 @@ class World:
             return False
 
         if not simulation_mode:
-            time.sleep(0.25)
+            diff = (datetime.datetime.now() - start_point)
+            diff = diff / datetime.timedelta(milliseconds=1)
+            if diff < (self.interval * 2):
+                time.sleep(((self.interval * 2) - diff) / 1000)
         return True
 
     def start(self, simulation_mode=False):
@@ -191,11 +197,20 @@ class World:
             cursor.hide()
             os.system("clear")
             print()
-        while True:
-            if not self.tick(simulation_mode):
-                break
+        try:
+            while True:
+                if not self.tick(simulation_mode):
+                    break
+        except KeyboardInterrupt:
+            if not simulation_mode:
+                os.system("clear")
+                print()
+                render(self)
+
         if not simulation_mode:
+            cursor.show()
             input()
+            os.system("clear")
         else:
             for snake in self.snakes:
                 print(snake.score, self.cycle)
@@ -213,6 +228,7 @@ class World:
         self.eat_score = json_config.get("b", self.eat_score)
         self.turn_cost = json_config.get("turn_cost", self.turn_cost)
         self.persist_score = json_config.get("persist_score", self.persist_score)
+        self.interval = json_config.get("interval", self.interval)
 
     def to_json(self, snake_id):
         res = dict()

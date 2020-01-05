@@ -1,12 +1,13 @@
 {
  "target_score": 500,
- "height": 15,
- "width": 45,
+ "height": 10,
+ "width": 10,
  "min_score": 1,
  "max_score": 10,
  "a": 10,
  "b": 5,
  "max_cycles": 1000,
  "persist_score": false,
- "turn_cost": 1
+ "turn_cost": 1,
+ "interval": 500
 }
