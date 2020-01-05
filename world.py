@@ -180,16 +180,17 @@ class World:
 
         max_score = max(map(lambda x: x.score, self.snakes))
 
-        if max_score >= self.target_score:
-            if not simulation_mode:
-                render(self)
-            return False
-
         if not simulation_mode:
             diff = (datetime.datetime.now() - start_point)
             diff = diff / datetime.timedelta(milliseconds=1)
             if diff < (self.interval * 2):
                 time.sleep(((self.interval * 2) - diff) / 1000)
+
+        if max_score >= self.target_score:
+            if not simulation_mode:
+                render(self)
+            return False
+
         return True
 
     def start(self, simulation_mode=False):

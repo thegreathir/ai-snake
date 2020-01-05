@@ -192,7 +192,7 @@ auto next_state(const State& state, int snake_id, const Direction& action) {
 
     if (snake.body.size() == 1) {
         if (new_state.scores[head.y()][head.x()] != 0) {
-            snake.length = new_state.scores[head.y()][head.x()];
+            snake.length = new_state.scores[head.y()][head.x()] + 1;
             snake.data.eat_count += 1;
             new_state.scores[head.y()][head.x()] = 0;
             snake.growing = true;
