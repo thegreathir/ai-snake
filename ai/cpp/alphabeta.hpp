@@ -271,12 +271,11 @@ std::pair<double, Direction> alphabeta(const State& state, int depth, double alp
     }
 }
 
-char get_action(const std::string& world_json_string) {
+char get_action(const std::string& world_json_string, int depth = 13) {
     auto world_json = nlohmann::json::parse(world_json_string);
 
     State state(world_json);
     Direction action = Direction::NONE;
-    constexpr int depth = 13;
     std::tie(std::ignore, action) = alphabeta(state, depth, -std::numeric_limits<double>::infinity(),
             std::numeric_limits<double>::infinity(), true);
 
