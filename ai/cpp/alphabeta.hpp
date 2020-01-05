@@ -88,7 +88,7 @@ public:
 
     MetaData data;
 
-    State(const nlohmann::json& world_json)
+    explicit State(const nlohmann::json& world_json)
     : width(world_json["width"])
     , height(world_json["height"])
     , my_snake_id(world_json["my_snake_id"])
@@ -219,7 +219,7 @@ double get_heuristic_value(const State& state, int /*snake_id*/) {
 
 std::pair<double, Direction> alphabeta(const State& state, int depth, double alpha, double beta,
         bool my_turn) {
-    int snake_id = my_turn ? state.my_snake_id : state.opp_snake_id; 
+    int snake_id = my_turn ? state.my_snake_id : state.opp_snake_id;
 
     if (state.is_dead(snake_id)) {
         if (my_turn) {
