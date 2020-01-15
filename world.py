@@ -66,6 +66,7 @@ class World:
         self.persist_score = False
         self.scores = []
         self.table = {}
+        self.team_score = {}
         self.last_id = 0
         self.interval = 1000
         self.simulation_mode = False
@@ -88,8 +89,17 @@ class World:
                 j == self.height)
 
     def update_table(self):
+        a_score = 0
+        b_score = 0
         for snake in self.snakes:
+            if snake.side == Side.A:
+                a_score += snake.score
+            if snake.side == Side.B:
+                b_score += snake.score
             self.table[snake.snake_id] = (snake.color, snake.score)
+
+        self.team_score[Side.A] = (Side.get_color(Side.A), a_score)
+        self.team_score[Side.B] = (Side.get_color(Side.B), b_score)
 
     def collision_bodies(self, head):
         for snake in self.snakes:
@@ -193,7 +203,7 @@ class World:
         self.update_table()
         self.cycle = self.cycle + 1
 
-        max_score = max(map(lambda x: x.score, self.snakes))
+        max_score = max(map((lambda v: v[1][1]), self.team_score.items()))
 
         if not self.simulation_mode:
             diff = (datetime.datetime.now() - start_point)

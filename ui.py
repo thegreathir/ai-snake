@@ -128,4 +128,8 @@ def render(world):
     for snake_id, score in world.table.items():
         print("%d %s%s%s" % (snake_id, fg("light_" + score[0]), score[1], attr("reset")), "\t", end="")
     print()
+    for side, score in world.team_score.items():
+        print("%s%d%s" % (fg("light_" + score[0]), score[1], attr("reset")), "\t", end="")
+
+    print()
     print("\033[%d;%dH" % (0, 0))
