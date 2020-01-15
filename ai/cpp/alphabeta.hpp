@@ -2,6 +2,7 @@
 #include <vector>
 #include <cmath>
 #include <limits>
+#include <random>
 #include "json.hpp"
 
 namespace alphabeta {
@@ -180,6 +181,10 @@ public:
         for (auto&& act : directions)
             if (is_action_available(snake_id, act))
                 res.emplace_back(act);
+
+
+        static auto rng = std::default_random_engine {};
+        std::shuffle(std::begin(res), std::end(res), rng);
         return res;
     }
 };
