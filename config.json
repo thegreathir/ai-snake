@@ -12,6 +12,6 @@
  "interval": 500,
  "players_per_team": 2,
  "simulation_mode": false,
- "agent_a":"random",
- "agent_b":"random"
+ "agent_a": "random",
+ "agent_b": "random"
 }
