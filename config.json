@@ -9,5 +9,9 @@
  "max_cycles": 1000,
  "persist_score": false,
  "turn_cost": 1,
- "interval": 500
+ "interval": 500,
+ "players_per_team": 2,
+ "simulation_mode": false,
+ "agent_a":"random",
+ "agent_b":"random"
 }

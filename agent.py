@@ -9,7 +9,7 @@ def get_random_action():
     return [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT][act_int - 1]
 
 
-class Agent:
+class AlphaBetaAgent:
 
     def __init__(self, world):
         self.snake_id = world.register(self)

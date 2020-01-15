@@ -18,26 +18,41 @@ class Direction:
     def get_all():
         return [Direction.UP, Direction.RIGHT, Direction.LEFT, Direction.DOWN]
 
+class Side:
+    COLORS = ["red", "green", "blue", "magneta", "cyan"]
+    A = 0
+    B = 1
+
+    @staticmethod
+    def get_side(snake_id):
+        if snake_id % 2 == 0:
+            return Side.A
+        return Side.B
+    @staticmethod
+    def get_color(side):
+        if side == Side.A:
+            return Side.COLORS[0]
+        return Side.COLORS[2]
 
 class Snake:
 
-    def __init__(self, snake_id, x, y, direction, color):
+    def __init__(self, snake_id, x, y, direction):
         self.body = [(x, y)]
         self.score = 0
         self.direction = direction
         self.length = 1
         self.growing = False
-        self.color = color
         self.snake_id = snake_id
+        self.side = Side.get_side(self.snake_id)
+        self.color = Side.get_color(self.side)
 
     def get_head(self):
         return self.body[-1]
 
 
 class World:
-    COLORS = ["red", "green", "blue", "magneta", "cyan"]
 
-    def __init__(self, config_file=None):
+    def __init__(self, json_config=None):
         self.target_score = 500
         self.height = 12
         self.width = 40
@@ -53,9 +68,10 @@ class World:
         self.table = {}
         self.last_id = 0
         self.interval = 1000
+        self.simulation_mode = False
 
-        if config_file is not None:
-            self.load_config(config_file)
+        if json_config is not None:
+            self.load_config(json_config)
 
         bg = BaitGenerator(self.width, self.height, "mapfile.txt")
         self.scores = bg.get_random(self.min_score, self.max_score)
@@ -155,19 +171,18 @@ class World:
                 break
         return res
 
-    def tick(self, simulation_mode):
+    def tick(self):
         start_point = datetime.datetime.now()
         if self.cycle > self.max_cycles:
             return False
 
-        if not simulation_mode:
+        if not self.simulation_mode:
             render(self)
         new_snakes = []
         for snake in self.snakes:
             if self.is_dead(snake):
                 continue
             new_dir = self.agents[snake.snake_id].get_action(self)
-            # todo die
             fixed_dir = self.fix_action(snake, new_dir)
             self.move_snake(snake, fixed_dir)
             new_snakes.append(snake)
@@ -180,35 +195,35 @@ class World:
 
         max_score = max(map(lambda x: x.score, self.snakes))
 
-        if not simulation_mode:
+        if not self.simulation_mode:
             diff = (datetime.datetime.now() - start_point)
             diff = diff / datetime.timedelta(milliseconds=1)
             if diff < (self.interval * 2):
                 time.sleep(((self.interval * 2) - diff) / 1000)
 
         if max_score >= self.target_score:
-            if not simulation_mode:
+            if not self.simulation_mode:
                 render(self)
             return False
 
         return True
 
-    def start(self, simulation_mode=False):
-        if not simulation_mode:
+    def start(self):
+        if not self.simulation_mode:
             cursor.hide()
             os.system("clear")
             print()
         try:
             while True:
-                if not self.tick(simulation_mode):
+                if not self.tick():
                     break
         except KeyboardInterrupt:
-            if not simulation_mode:
+            if not self.simulation_mode:
                 os.system("clear")
                 print()
                 render(self)
 
-        if not simulation_mode:
+        if not self.simulation_mode:
             cursor.show()
             input()
             os.system("clear")
@@ -216,9 +231,7 @@ class World:
             for snake in self.snakes:
                 print(snake.score, self.cycle)
 
-    def load_config(self, config_file):
-        f = open(config_file, "r")
-        json_config = json.loads(f.read())
+    def load_config(self, json_config):
         self.target_score = json_config.get("target_score", self.target_score)
         self.height = json_config.get("height", self.height)
         self.width = json_config.get("width", self.width)
@@ -230,6 +243,7 @@ class World:
         self.turn_cost = json_config.get("turn_cost", self.turn_cost)
         self.persist_score = json_config.get("persist_score", self.persist_score)
         self.interval = json_config.get("interval", self.interval)
+        self.simulation_mode = json_config.get("simulation_mode", False)
 
     def to_json(self, snake_id):
         res = dict()
@@ -245,12 +259,11 @@ class World:
 
         for snake in self.snakes:
             res["snakes"].append({"id":snake.snake_id, "length":snake.length,
-                "growing":snake.growing, "body":[]})
+                "growing":snake.growing, "body":[], "side":snake.side})
             for body in snake.body:
                 res["snakes"][-1]["body"].append({"x":body[0], "y":body[1]})
 
         res["my_snake_id"] = snake_id
-        res["opp_snake_id"] = list(set(range(len(self.snakes))) - {snake_id})[0]
 
         return json.dumps(res)
 
@@ -260,5 +273,5 @@ class World:
         self.agents[new_id] = agent
 
         self.snakes.append(Snake(new_id, random.randint(0, self.width - 1), random.randint(0, self.height - 1),
-                                 "rlud"[random.randint(0, 3)], World.COLORS[new_id % len(World.COLORS)]))
+                                 "rlud"[random.randint(0, 3)]))
         return new_id

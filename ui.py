@@ -10,7 +10,7 @@ def format_world(world):
     boxing_data = []
 
     color_template = [
-        ["white", "yellow", "light_yellow"],
+        ["white", "light_yellow", "light_yellow"],
         ["white", "white", "white"],
     ]
     bg_color_template = [
@@ -54,6 +54,12 @@ def format_world(world):
         for i in range(2):
             for j in range(3):
                 data[body[1]][body[0]][2][i][j] = "light_" + snake.color
+        if snake.snake_id < 10:
+            data[body[1]][body[0]][0][1][0] = snake.snake_id
+        else:
+            data[body[1]][body[0]][0][1][0] = str(int(snake.snake_id))
+            data[body[1]][body[0]][0][1][1] = int(snake.snake_id % 10)
+
 
         for i in range(len(snake.body) - 1):
             cur = snake.body[i]
@@ -120,6 +126,6 @@ def render(world):
         print("%s%s%s" % (bg(bg_color), boxing[3], attr("reset")), end="")
     print("%s%s%s" % (bg(bg_color), boxing[6], attr("reset")))
     for snake_id, score in world.table.items():
-        print("%s%s%s" % (fg("light_" + score[0]), score[1], attr("reset")), "\t", end="")
+        print("%d %s%s%s" % (snake_id, fg("light_" + score[0]), score[1], attr("reset")), "\t", end="")
     print()
     print("\033[%d;%dH" % (0, 0))
