@@ -3,6 +3,12 @@ import sys
 from world import World, Side
 from agent import AlphaBetaAgent, RandomAgent
 
+def get_agent(name):
+    if name == "random":
+        return RandomAgent(world)
+    if name == "alphabeta":
+        return AlphaBetaAgent(world)
+
 if __name__ == "__main__":
     json_config = None
     with open("config.json", 'r') as config_file:
@@ -16,10 +22,8 @@ if __name__ == "__main__":
 
     for i in range(json_config["players_per_team"] * 2):
         if i % 2 == Side.A:
-            if json_config["agent_a"] == "random":
-                agents.append(RandomAgent(world))
+            agents.append(get_agent(json_config["agent_a"]))
         elif i % 2 == Side.B:
-            if json_config["agent_b"] == "random":
-                agents.append(RandomAgent(world))
+            agents.append(get_agent(json_config["agent_b"]))
 
     world.start()
