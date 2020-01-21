@@ -1,9 +1,9 @@
 {
- "target_score": 500,
+ "target_score": 1000,
  "height": 10,
- "width": 10,
+ "width": 30,
  "min_score": 1,
- "max_score": 10,
+ "max_score": 5,
  "a": 10,
  "b": 5,
  "max_cycles": 1000,
@@ -12,6 +12,6 @@
  "interval": 500,
  "players_per_team": 2,
  "simulation_mode": false,
- "agent_a": "random",
- "agent_b": "random"
+ "agent_a": "alphabeta",
+ "agent_b": "alphabeta"
 }

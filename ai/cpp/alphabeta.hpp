@@ -80,8 +80,7 @@ public:
     int width;
     int height;
     int my_snake_id;
-    int opp_snake_id;
-    std::vector<std::vector<int>> scores;
+    std::vector<std::vector<std::uint8_t>> scores;
     std::vector<Snake> snakes;
 
     struct MetaData {
@@ -93,7 +92,6 @@ public:
     : width(world_json["width"])
     , height(world_json["height"])
     , my_snake_id(world_json["my_snake_id"])
-    , opp_snake_id(world_json["opp_snake_id"])
     {
         for (int h = 0; h < this->height; ++h) {
             this->scores.emplace_back();
@@ -219,12 +217,15 @@ auto next_state(const State& state, int snake_id, const Direction& action) {
 }
 
 double get_heuristic_value(const State& state, int /*snake_id*/) {
-    return static_cast<double>(state.snakes[state.my_snake_id].data.eat_count);
+    double team_score = 0;
+    for (auto &snake: state.snakes)
+        if ((state.my_snake_id % 2) == (snake.id % 2))
+            team_score += static_cast<double>(snake.data.eat_count);
+    return team_score;
 }
 
 std::pair<double, Direction> alphabeta(const State& state, int depth, double alpha, double beta,
-        bool my_turn) {
-    int snake_id = my_turn ? state.my_snake_id : state.opp_snake_id;
+        std::size_t snake_id, bool my_turn) {
 
     if (state.is_dead(snake_id)) {
         if (my_turn) {
@@ -243,7 +244,7 @@ std::pair<double, Direction> alphabeta(const State& state, int depth, double alp
         for (auto&& candidate : state.get_available_actions(snake_id)) {
             double new_val = 0;
             std::tie(new_val, std::ignore) = alphabeta(next_state(state, snake_id, candidate),
-                    depth - 1, alpha, beta, false);
+                    depth - 1, alpha, beta, (snake_id + 1) % state.snakes.size(), false);
 
             if (new_val > value) {
                 action = candidate;
@@ -261,7 +262,7 @@ std::pair<double, Direction> alphabeta(const State& state, int depth, double alp
         for (auto&& candidate : state.get_available_actions(snake_id)) {
             double new_val = 0;
             std::tie(new_val, std::ignore) = alphabeta(next_state(state, snake_id, candidate),
-                    depth - 1, alpha, beta, true);
+                    depth - 1, alpha, beta, (snake_id + 1) % state.snakes.size(), true);
 
             if (new_val < value) {
                 action = candidate;
@@ -277,12 +278,13 @@ std::pair<double, Direction> alphabeta(const State& state, int depth, double alp
 }
 
 char get_action(const std::string& world_json_string, int depth = 13) {
+    // std::cout << world_json_string << std::endl;
     auto world_json = nlohmann::json::parse(world_json_string);
 
     State state(world_json);
     Direction action = Direction::NONE;
     std::tie(std::ignore, action) = alphabeta(state, depth, -std::numeric_limits<double>::infinity(),
-            std::numeric_limits<double>::infinity(), true);
+            std::numeric_limits<double>::infinity(), state.my_snake_id, true);
 
     return to_char(action);
 }
