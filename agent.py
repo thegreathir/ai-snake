@@ -18,8 +18,12 @@ class Agent:
 
 class AlphaBetaAgent(Agent):
 
+    def __init__(self, world, properties):
+        super().__init__(world)
+        self.depth = properties["depth"]
+
     def get_action(self, world):
-        return cppagent.get_alphabeta_action(world.to_json(self.snake_id), 16)
+        return cppagent.get_alphabeta_action(world.to_json(self.snake_id), self.depth)
 
 
 class RandomAgent(Agent):

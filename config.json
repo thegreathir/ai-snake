@@ -1,19 +1,29 @@
 {
- "target_score": 1000,
- "height": 10,
- "width": 30,
- "min_score": 1,
- "max_score": 5,
- "a": 10,
- "b": 5,
- "max_cycles": 1000,
- "persist_score": false,
- "turn_cost": 1,
- "collision_cost": 1,
- "load_map": false,
- "interval": 500,
- "players_per_team": 2,
- "simulation_mode": false,
- "agent_a": "alphabeta",
- "agent_b": "alphabeta"
+  "target_score": 1000,
+  "height": 10,
+  "width": 30,
+  "min_score": 1,
+  "max_score": 5,
+  "a": 10,
+  "b": 5,
+  "max_cycles": 1000,
+  "persist_score": false,
+  "turn_cost": 1,
+  "collision_cost": 1,
+  "load_map": false,
+  "interval": 500,
+  "players_per_team": 2,
+  "simulation_mode": false,
+  "agent_a": {
+    "type": "alphabeta",
+    "properties": {
+      "depth": 16
+    }
+  },
+  "agent_b": {
+    "type": "alphabeta",
+    "properties": {
+      "depth": 16
+    }
+  }
 }
