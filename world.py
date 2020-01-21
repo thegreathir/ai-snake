@@ -8,6 +8,7 @@ import os
 from ui import render
 from bait_generator import BaitGenerator
 
+
 class Direction:
     RIGHT = "r"
     LEFT = "l"
@@ -17,6 +18,7 @@ class Direction:
     @staticmethod
     def get_all():
         return [Direction.UP, Direction.RIGHT, Direction.LEFT, Direction.DOWN]
+
 
 class Side:
     COLORS = ["red", "green", "blue", "magneta", "cyan"]
@@ -28,11 +30,13 @@ class Side:
         if snake_id % 2 == 0:
             return Side.A
         return Side.B
+
     @staticmethod
     def get_color(side):
         if side == Side.A:
             return Side.COLORS[0]
         return Side.COLORS[2]
+
 
 class Snake:
 
@@ -191,6 +195,7 @@ class World:
         new_snakes = []
         for snake in self.snakes:
             if self.is_dead(snake):
+                return False
                 continue
             new_dir = self.agents[snake.snake_id].get_action(self)
             fixed_dir = self.fix_action(snake, new_dir)
@@ -268,10 +273,10 @@ class World:
         res["snakes"] = []
 
         for snake in self.snakes:
-            res["snakes"].append({"id":snake.snake_id, "length":snake.length,
-                "growing":snake.growing, "body":[], "side":snake.side})
+            res["snakes"].append({"id": snake.snake_id, "length": snake.length,
+                                  "growing": snake.growing, "body": [], "side": snake.side})
             for body in snake.body:
-                res["snakes"][-1]["body"].append({"x":body[0], "y":body[1]})
+                res["snakes"][-1]["body"].append({"x": body[0], "y": body[1]})
 
         res["my_snake_id"] = snake_id
 

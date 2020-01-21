@@ -60,7 +60,6 @@ def format_world(world):
             data[body[1]][body[0]][0][1][0] = str(int(snake.snake_id))
             data[body[1]][body[0]][0][1][1] = int(snake.snake_id % 10)
 
-
         for i in range(len(snake.body) - 1):
             cur = snake.body[i]
             nxt = snake.body[i + 1]
@@ -98,7 +97,8 @@ def render(world):
             for j in range(m):
                 print("%s%s%s" % (bg(boxing_color[i][j][1][y]), boxing[2], attr("reset")), end="")
                 for x in range(ww):
-                    print("%s%s%s%s" % (bg(data[i][j][2][y][x]), fg(data[i][j][1][y][x]), data[i][j][0][y][x], attr("reset")), end="")
+                    print("%s%s%s%s" % (
+                    bg(data[i][j][2][y][x]), fg(data[i][j][1][y][x]), data[i][j][0][y][x], attr("reset")), end="")
             print("%s%s%s" % (bg(bg_color), boxing[2], attr("reset")))
 
         print("%s%s%s" % (bg(bg_color), boxing[10], attr("reset")), end="")
@@ -114,7 +114,9 @@ def render(world):
         for i in range(m):
             print("%s%s%s" % (bg(boxing_color[n - 1][i][1][y]), boxing[2], attr("reset")), end="")
             for x in range(ww):
-                print("%s%s%s%s" % (bg(data[n - 1][i][2][y][x]), fg(data[n - 1][i][1][y][x]), data[n - 1][i][0][y][x], attr("reset")), end="")
+                print("%s%s%s%s" % (
+                bg(data[n - 1][i][2][y][x]), fg(data[n - 1][i][1][y][x]), data[n - 1][i][0][y][x], attr("reset")),
+                      end="")
         print("%s%s%s" % (bg(bg_color), boxing[2], attr("reset")))
 
     print("%s%s%s" % (bg(bg_color), boxing[5], attr("reset")), end="")
