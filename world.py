@@ -74,12 +74,17 @@ class World:
         self.last_id = 0
         self.interval = 1000
         self.simulation_mode = False
+        self.load_map = False
 
         if json_config is not None:
             self.load_config(json_config)
 
         bg = BaitGenerator(self.width, self.height, "mapfile.txt")
-        self.scores = bg.get_random(self.min_score, self.max_score)
+
+        if self.load_map:
+            self.scores = bg.get_scores()
+        else:
+            self.scores = bg.get_random(self.min_score, self.max_score)
 
         self.snakes = []
         self.agents = {}
@@ -259,6 +264,7 @@ class World:
         self.persist_score = json_config.get("persist_score", self.persist_score)
         self.interval = json_config.get("interval", self.interval)
         self.simulation_mode = json_config.get("simulation_mode", False)
+        self.load_map = json_config.get("load_map", False)
 
     def to_json(self, snake_id):
         res = dict()
