@@ -75,16 +75,16 @@ class World:
         self.interval = 1000
         self.simulation_mode = False
         self.load_map = False
+        self.collision_cost = 1
 
         if json_config is not None:
             self.load_config(json_config)
 
-        bg = BaitGenerator(self.width, self.height, "mapfile.txt")
-
         if self.load_map:
+            bg = BaitGenerator(self.width, self.height, "mapfile.txt")
             self.scores = bg.get_scores()
         else:
-            self.scores = bg.get_random(self.min_score, self.max_score)
+            self.scores = BaitGenerator.get_random(self.width, self.height, self.min_score, self.max_score)
 
         self.snakes = []
         self.agents = {}
@@ -110,11 +110,17 @@ class World:
         self.team_score[Side.A] = (Side.get_color(Side.A), a_score)
         self.team_score[Side.B] = (Side.get_color(Side.B), b_score)
 
-    def collision_bodies(self, head):
+    def collision_bodies(self, snake_id, point):
+        snake = self.snakes[snake_id]
+        for body in snake.body:
+            if body[0] == point[0] and body[1] == point[1]:
+                return True
+        return False
+
+    def strict_collision_bodies(self, point):
         for snake in self.snakes:
-            for body in snake.body:
-                if body[0] == head[0] and body[1] == head[1]:
-                    return True
+            if self.collision_bodies(snake.snake_id, point):
+                return True
         return False
 
     def is_dead(self, snake):
@@ -123,7 +129,7 @@ class World:
                 if abs(i) + abs(j) != 1:
                     continue
                 new_head = [snake.get_head()[0] + i, snake.get_head()[1] + j]
-                if not self.is_head_out(new_head) and not self.collision_bodies(new_head):
+                if not self.is_head_out(new_head) and not self.collision_bodies(snake.snake_id, new_head):
                     return False
         return True
 
@@ -147,6 +153,10 @@ class World:
                 snake.score -= self.turn_cost
                 snake.score = max(0, snake.score)
             direction = new_direction
+
+        if self.strict_collision_bodies(head):
+            snake.score -= self.collision_cost
+            snake.score = max(0, snake.score)
 
         nxt = None
         if direction == Direction.RIGHT:
@@ -186,7 +196,7 @@ class World:
                 res = Direction.DOWN
                 snake_dir = Direction.LEFT
 
-            if not self.is_head_out(head) and not self.collision_bodies(head):
+            if not self.is_head_out(head) and not self.collision_bodies(snake.snake_id, head):
                 break
         return res
 
@@ -265,6 +275,7 @@ class World:
         self.interval = json_config.get("interval", self.interval)
         self.simulation_mode = json_config.get("simulation_mode", False)
         self.load_map = json_config.get("load_map", False)
+        self.collision_cost = json_config.get("collision_cost", self.collision_cost)
 
     def to_json(self, snake_id):
         res = dict()

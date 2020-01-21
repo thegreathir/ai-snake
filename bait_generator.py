@@ -18,11 +18,12 @@ class BaitGenerator():
             self.map_data.append([int(x) for x in file.readline().split()])
         file.close()
 
-    def get_random(self, min_score, max_score):
+    @staticmethod
+    def get_random(x, y, min_score, max_score):
         scores = []
-        for i in range(self.y):
+        for i in range(y):
             row = []
-            for j in range(self.x):
+            for j in range(x):
                 row.append(random.randint(min_score, max_score))
             scores.append(row)
         return scores
