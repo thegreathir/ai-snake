@@ -281,6 +281,12 @@ class World:
         res = dict()
         res["height"] = self.height
         res["width"] = self.width
+        res["persist_score"] = self.persist_score
+        res["turn_cost"] = self.turn_cost
+        res["collision_cost"] = self.collision_cost
+        res["eat_score"] = self.eat_score
+        res["score_c"] = self.score_c
+
         res["scores"] = []
 
         for row in self.scores:

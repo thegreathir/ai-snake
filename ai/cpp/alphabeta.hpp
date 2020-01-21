@@ -3,9 +3,28 @@
 #include <cmath>
 #include <limits>
 #include <random>
+#include <memory>
 #include "json.hpp"
 
 namespace alphabeta {
+
+class Config {
+public:
+    bool persist_score;
+    double turn_cost;
+    double collision_cost;
+    double eat_score;
+    double score_c;
+
+    Config(bool persist_score, double turn_cost, double collision_cost, double eat_score,
+            double score_c)
+    : persist_score(persist_score)
+    , turn_cost(turn_cost)
+    , collision_cost(collision_cost)
+    , eat_score(eat_score)
+    , score_c(score_c)
+    {}
+};
 
 class Point {
     std::pair<int, int> coordinates;
@@ -88,6 +107,8 @@ public:
 
     MetaData data;
 
+    std::shared_ptr<Config> config;
+
     explicit State(const nlohmann::json& world_json)
     : width(world_json["width"])
     , height(world_json["height"])
@@ -107,6 +128,8 @@ public:
             }
         }
 
+        config = std::make_shared<Config>(world_json["persist_score"], world_json["turn_cost"],
+                world_json["collision_cost"], world_json["eat_score"], world_json["score_c"]);
     }
 
     bool is_head_out(const Point& head) const {
@@ -197,7 +220,9 @@ auto next_state(const State& state, int snake_id, const Direction& action) {
         if (new_state.scores[head.y()][head.x()] != 0) {
             snake.length = new_state.scores[head.y()][head.x()] + 1;
             snake.data.eat_count += 1;
-            new_state.scores[head.y()][head.x()] = 0;
+
+            if (!new_state.config->persist_score)
+                new_state.scores[head.y()][head.x()] = 0;
             snake.growing = true;
         }
     } else
@@ -218,7 +243,7 @@ auto next_state(const State& state, int snake_id, const Direction& action) {
 
 double get_heuristic_value(const State& state, int /*snake_id*/) {
     double team_score = 0;
-    for (auto &snake: state.snakes)
+    for (auto&& snake : state.snakes)
         if ((state.my_snake_id % 2) == (snake.id % 2))
             team_score += static_cast<double>(snake.data.eat_count);
     return team_score;
@@ -278,7 +303,6 @@ std::pair<double, Direction> alphabeta(const State& state, int depth, double alp
 }
 
 char get_action(const std::string& world_json_string, int depth = 13) {
-    // std::cout << world_json_string << std::endl;
     auto world_json = nlohmann::json::parse(world_json_string);
 
     State state(world_json);
