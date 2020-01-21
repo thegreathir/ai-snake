@@ -3,7 +3,8 @@ import random
 import time
 import datetime
 import cursor
-import os
+import os, sys
+import termios
 
 from ui import render
 from bait_generator import BaitGenerator
@@ -238,9 +239,20 @@ class World:
 
         return True
 
+    @staticmethod
+    def disable_console_echo():
+        TERMIOS = termios
+        fd = sys.stdin.fileno()
+        new = termios.tcgetattr(fd)
+        new[3] = new[3] & ~TERMIOS.ICANON & ~TERMIOS.ECHO
+        new[6][TERMIOS.VMIN] = 1
+        new[6][TERMIOS.VTIME] = 0
+        termios.tcsetattr(fd, TERMIOS.TCSANOW, new)
+
     def start(self):
         if not self.simulation_mode:
             cursor.hide()
+            World.disable_console_echo()
             os.system("clear")
             print()
         try:
