@@ -2,6 +2,7 @@ from ai.dls import get_dls_action
 from ai.gs import get_gs_action
 from world import *
 import random
+import sys, os, termios
 from ai import cppagent
 
 
@@ -30,3 +31,31 @@ class RandomAgent(Agent):
 
     def get_action(self, world):
         return get_random_action()
+
+
+class HumanAgent(Agent):
+
+    @staticmethod
+    def getkey():
+        TERMIOS = termios
+        fd = sys.stdin.fileno()
+        old = termios.tcgetattr(fd)
+        new = termios.tcgetattr(fd)
+        new[3] = new[3] & ~TERMIOS.ICANON & ~TERMIOS.ECHO
+        new[6][TERMIOS.VMIN] = 1
+        new[6][TERMIOS.VTIME] = 0
+        termios.tcsetattr(fd, TERMIOS.TCSANOW, new)
+        c = os.read(fd, 1)
+        return c
+
+    def get_action(self, world):
+        while True:
+            key =  HumanAgent.getkey().decode('utf-8')
+            if key == 'w':
+                return Direction.UP
+            elif key == 's':
+                return Direction.DOWN
+            elif key == 'a':
+                return Direction.LEFT
+            elif key == 'd':
+                return Direction.RIGHT

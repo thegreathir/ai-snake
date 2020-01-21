@@ -1,7 +1,7 @@
 import json
 import sys
 from world import World, Side
-from agent import AlphaBetaAgent, RandomAgent
+from agent import AlphaBetaAgent, RandomAgent, HumanAgent
 
 
 def get_agent(name, properties):
@@ -9,6 +9,8 @@ def get_agent(name, properties):
         return RandomAgent(world)
     if name == "alphabeta":
         return AlphaBetaAgent(world, properties)
+    if name == "human":
+        return HumanAgent(world)
 
 
 if __name__ == "__main__":

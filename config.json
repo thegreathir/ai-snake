@@ -21,9 +21,8 @@
     }
   },
   "agent_b": {
-    "type": "alphabeta",
+    "type": "human",
     "properties": {
-      "depth": 16
     }
   }
 }
