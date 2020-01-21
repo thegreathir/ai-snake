@@ -9,6 +9,8 @@
  "max_cycles": 1000,
  "persist_score": false,
  "turn_cost": 1,
+ "collision_cost": 1,
+ "load_map": false,
  "interval": 500,
  "players_per_team": 2,
  "simulation_mode": false,
