@@ -1,13 +1,15 @@
-import json
-import random
-import time
 import datetime
-import cursor
-import os, sys
+import json
+import os
+import random
+import sys
 import termios
+import time
 
-from ui import render
+import cursor
+
 from bait_generator import BaitGenerator
+from ui import render
 
 
 class Direction:
@@ -77,6 +79,7 @@ class World:
         self.simulation_mode = False
         self.load_map = False
         self.collision_cost = 1
+        self.decay_cost = 1
 
         if json_config is not None:
             self.load_config(json_config)
@@ -173,6 +176,11 @@ class World:
             snake.body.pop(0)
             if len(snake.body) > 1:
                 snake.body.pop(0)
+
+        if len(snake.body) == 1:
+            snake.score -= self.decay_cost
+            snake.score = max(snake.score, 0)
+
         snake.direction = direction
 
     def fix_action(self, snake, snake_dir):
@@ -288,6 +296,7 @@ class World:
         self.simulation_mode = json_config.get("simulation_mode", False)
         self.load_map = json_config.get("load_map", False)
         self.collision_cost = json_config.get("collision_cost", self.collision_cost)
+        self.decay_cost = json_config.get("decay_cost", self.decay_cost)
 
     def to_json(self, snake_id):
         res = dict()
@@ -296,6 +305,7 @@ class World:
         res["persist_score"] = self.persist_score
         res["turn_cost"] = self.turn_cost
         res["collision_cost"] = self.collision_cost
+        res["decay_cost"] = self.decay_cost
         res["eat_score"] = self.eat_score
         res["score_c"] = self.score_c
 
@@ -308,8 +318,9 @@ class World:
         res["snakes"] = []
 
         for snake in self.snakes:
-            res["snakes"].append({"id": snake.snake_id, "length": snake.length,
-                                  "growing": snake.growing, "body": [], "side": snake.side})
+            res["snakes"].append({"id": snake.snake_id, "length": snake.length, "score": snake.score,
+                                  "direction": snake.direction, "growing": snake.growing, "body": [],
+                                  "side": snake.side})
             for body in snake.body:
                 res["snakes"][-1]["body"].append({"x": body[0], "y": body[1]})
 

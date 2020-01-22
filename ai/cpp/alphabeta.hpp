@@ -9,22 +9,36 @@
 namespace alphabeta {
 
 class Config {
+
+private:
+    static std::unique_ptr<Config> instance;
+    Config() = default;
 public:
     bool persist_score;
     double turn_cost;
     double collision_cost;
+    double decay_cost;
     double eat_score;
     double score_c;
 
-    Config(bool persist_score, double turn_cost, double collision_cost, double eat_score,
-            double score_c)
-    : persist_score(persist_score)
-    , turn_cost(turn_cost)
-    , collision_cost(collision_cost)
-    , eat_score(eat_score)
-    , score_c(score_c)
-    {}
+    void load(const nlohmann::json& json_config) {
+        this->persist_score = json_config["persist_score"];
+        this->turn_cost = json_config["turn_cost"];
+        this->collision_cost = json_config["collision_cost"];
+        this->decay_cost = json_config["decay_cost"];
+        this->eat_score = json_config["eat_score"];
+        this->score_c = json_config["score_c"];
+    }
+
+    static const std::unique_ptr<Config>& i() {
+        if (instance == nullptr)
+            instance = std::unique_ptr<Config>(new Config());
+
+        return instance;
+    }
 };
+
+std::unique_ptr<Config> Config::instance = nullptr;
 
 class Point {
     std::pair<int, int> coordinates;
@@ -40,11 +54,36 @@ public:
     {}
 };
 
+enum class Direction : char {
+    LEFT = 'l',
+    RIGHT = 'r',
+    UP = 'u',
+    DOWN = 'd',
+    NONE = 'n'
+};
+
+Direction to_direction(const std::string& c) {
+    switch (c[0]) {
+        case 'l':
+            return Direction::LEFT;
+        case 'r':
+            return Direction::RIGHT;
+        case 'u':
+            return Direction::UP;
+        case 'd':
+            return Direction::DOWN;
+        default:
+            return Direction::NONE;
+    }
+}
+
 class Snake {
 public:
     int id;
     std::vector<Point> body;
     std::size_t length;
+    std::size_t score;
+    Direction direction;
     bool growing;
 
     class MetaData {
@@ -61,37 +100,17 @@ public:
         return body.back();
     }
 
-    Snake(int id, std::size_t length, bool growing, const MetaData& meta_data)
+    Snake(int id, std::size_t length, std::size_t score, const Direction& direction,
+            bool growing, const MetaData& meta_data)
     : id(id)
     , length(length)
+    , score(score)
+    , direction(direction)
     , growing(growing)
     , data(meta_data)
     {
     }
 };
-
-enum class Direction {
-    LEFT,
-    RIGHT,
-    UP,
-    DOWN,
-    NONE
-};
-
-char to_char(const Direction& dir) {
-    switch(dir) {
-        case Direction::LEFT:
-            return 'l';
-        case Direction::RIGHT:
-            return 'r';
-        case Direction::DOWN:
-            return 'd';
-        case Direction::UP:
-            return 'u';
-        default:
-            return 'l';
-    }
-}
 
 class State {
 public:
@@ -107,8 +126,6 @@ public:
 
     MetaData data;
 
-    std::shared_ptr<Config> config;
-
     explicit State(const nlohmann::json& world_json)
     : width(world_json["width"])
     , height(world_json["height"])
@@ -121,15 +138,12 @@ public:
         }
 
         for (auto&& snake : world_json["snakes"]) {
-            this->snakes.emplace_back(snake["id"], snake["length"], snake["growing"],
-                    Snake::MetaData(0));
+            this->snakes.emplace_back(snake["id"], snake["length"], snake["score"], to_direction(snake["direction"]),
+                    snake["growing"], Snake::MetaData(0));
             for (auto&& body : snake["body"]) {
                 this->snakes.back().body.emplace_back(body["x"], body["y"]);
             }
         }
-
-        config = std::make_shared<Config>(world_json["persist_score"], world_json["turn_cost"],
-                world_json["collision_cost"], world_json["eat_score"], world_json["score_c"]);
     }
 
     bool is_head_out(const Point& head) const {
@@ -218,16 +232,23 @@ auto next_state(const State& state, int snake_id, const Direction& action) {
 
     if (snake.body.size() == 1) {
         if (new_state.scores[head.y()][head.x()] != 0) {
+            snake.score = Config::i()->score_c * new_state.scores[head.y()][head.x()] + Config::i()->eat_score;
             snake.length = new_state.scores[head.y()][head.x()] + 1;
             snake.data.eat_count += 1;
 
-            if (!new_state.config->persist_score)
+            if (!Config::i()->persist_score)
                 new_state.scores[head.y()][head.x()] = 0;
             snake.growing = true;
         }
     } else
         if (snake.body.size() == snake.length)
             snake.growing = false;
+
+    if (action != snake.direction)
+    {
+        snake.score -= Config::i()->turn_cost;
+        snake.score = std::max(0UL, snake.score);
+    }
 
     auto new_head = alphabeta::State::get_next_head(head, action);
     snake.body.push_back(new_head);
@@ -237,6 +258,12 @@ auto next_state(const State& state, int snake_id, const Direction& action) {
             snake.body.erase(snake.body.begin());
     }
 
+    if (snake.body.size() == 1) {
+        snake.score -= Config::i()->decay_cost;
+        snake.score = std::max(0UL, snake.score);
+    }
+
+    snake.direction = action;
 
     return new_state;
 }
@@ -305,12 +332,14 @@ std::pair<double, Direction> alphabeta(const State& state, int depth, double alp
 char get_action(const std::string& world_json_string, int depth = 13) {
     auto world_json = nlohmann::json::parse(world_json_string);
 
+    Config::i()->load(world_json);
+
     State state(world_json);
     Direction action = Direction::NONE;
     std::tie(std::ignore, action) = alphabeta(state, depth, -std::numeric_limits<double>::infinity(),
             std::numeric_limits<double>::infinity(), state.my_snake_id, true);
 
-    return to_char(action);
+    return action == Direction::NONE ? 'l' : static_cast<char>(action);
 }
 
 }

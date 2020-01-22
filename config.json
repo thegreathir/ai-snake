@@ -1,7 +1,7 @@
 {
   "target_score": 1000,
   "height": 10,
-  "width": 30,
+  "width": 10,
   "min_score": 1,
   "max_score": 5,
   "a": 10,
@@ -12,8 +12,9 @@
   "collision_cost": 1,
   "load_map": false,
   "interval": 500,
-  "players_per_team": 2,
+  "players_per_team": 1,
   "simulation_mode": false,
+  "decay_cost": 1,
   "agent_a": {
     "type": "alphabeta",
     "properties": {
@@ -21,8 +22,9 @@
     }
   },
   "agent_b": {
-    "type": "human",
+    "type": "alphabeta",
     "properties": {
+      "depth": 16
     }
   }
 }
