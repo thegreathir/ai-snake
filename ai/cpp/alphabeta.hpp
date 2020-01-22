@@ -1,12 +1,16 @@
+#include "json.hpp"
+
 #include <string>
 #include <vector>
 #include <cmath>
 #include <limits>
 #include <random>
 #include <memory>
-#include "json.hpp"
+#include <functional>
 
 namespace alphabeta {
+
+class State;
 
 class Config {
 
@@ -20,6 +24,8 @@ public:
     double decay_cost;
     double eat_score;
     double score_c;
+
+    std::function<double(State, int)> heuristic;
 
     void load(const nlohmann::json& json_config) {
         this->persist_score = json_config["persist_score"];
@@ -268,12 +274,24 @@ auto next_state(const State& state, int snake_id, const Direction& action) {
     return new_state;
 }
 
-double get_heuristic_value(const State& state, int /*snake_id*/) {
-    double team_score = 0;
+double get_eat_count_heuristic(const State& state, int /*snake_id*/) {
+    double team_eat_count = 0;
     for (auto&& snake : state.snakes)
         if ((state.my_snake_id % 2) == (snake.id % 2))
-            team_score += static_cast<double>(snake.data.eat_count);
-    return team_score;
+            team_eat_count += static_cast<double>(snake.data.eat_count);
+    return team_eat_count;
+}
+
+double get_score_heuristic(const State& state, int /*snake_id*/) {
+    double our_score = 0;
+    double their_score = 0;
+    for (auto&& snake : state.snakes)
+        if ((state.my_snake_id % 2) == (snake.id % 2))
+            our_score += static_cast<double>(snake.score);
+        else
+            their_score += static_cast<double>(snake.score);
+
+    return our_score - their_score;
 }
 
 std::pair<double, Direction> alphabeta(const State& state, int depth, double alpha, double beta,
@@ -288,7 +306,7 @@ std::pair<double, Direction> alphabeta(const State& state, int depth, double alp
     }
 
     if (depth == 0)
-        return std::make_pair(get_heuristic_value(state, snake_id), Direction::NONE);
+        return std::make_pair(Config::i()->heuristic(state, snake_id), Direction::NONE);
 
     if (my_turn) {
         double value = -std::numeric_limits<double>::infinity();
@@ -329,14 +347,21 @@ std::pair<double, Direction> alphabeta(const State& state, int depth, double alp
     }
 }
 
-char get_action(const std::string& world_json_string, int depth = 13) {
+char get_action(const std::string& world_json_string, const std::string& properties_json) {
     auto world_json = nlohmann::json::parse(world_json_string);
-
     Config::i()->load(world_json);
+
+    auto properties = nlohmann::json::parse(properties_json);
+
+    if (properties["heuristic"] == "score")
+        Config::i()->heuristic = &get_score_heuristic;
+
+    if (properties["heuristic"] == "eat count")
+        Config::i()->heuristic = &get_eat_count_heuristic;
 
     State state(world_json);
     Direction action = Direction::NONE;
-    std::tie(std::ignore, action) = alphabeta(state, depth, -std::numeric_limits<double>::infinity(),
+    std::tie(std::ignore, action) = alphabeta(state, properties["depth"], -std::numeric_limits<double>::infinity(),
             std::numeric_limits<double>::infinity(), state.my_snake_id, true);
 
     return action == Direction::NONE ? 'l' : static_cast<char>(action);

@@ -98,7 +98,7 @@ def render(world):
                 print("%s%s%s" % (bg(boxing_color[i][j][1][y]), boxing[2], attr("reset")), end="")
                 for x in range(ww):
                     print("%s%s%s%s" % (
-                    bg(data[i][j][2][y][x]), fg(data[i][j][1][y][x]), data[i][j][0][y][x], attr("reset")), end="")
+                        bg(data[i][j][2][y][x]), fg(data[i][j][1][y][x]), data[i][j][0][y][x], attr("reset")), end="")
             print("%s%s%s" % (bg(bg_color), boxing[2], attr("reset")))
 
         print("%s%s%s" % (bg(bg_color), boxing[10], attr("reset")), end="")
@@ -115,7 +115,7 @@ def render(world):
             print("%s%s%s" % (bg(boxing_color[n - 1][i][1][y]), boxing[2], attr("reset")), end="")
             for x in range(ww):
                 print("%s%s%s%s" % (
-                bg(data[n - 1][i][2][y][x]), fg(data[n - 1][i][1][y][x]), data[n - 1][i][0][y][x], attr("reset")),
+                    bg(data[n - 1][i][2][y][x]), fg(data[n - 1][i][1][y][x]), data[n - 1][i][0][y][x], attr("reset")),
                       end="")
         print("%s%s%s" % (bg(bg_color), boxing[2], attr("reset")))
 
@@ -130,8 +130,9 @@ def render(world):
     for snake_id, score in world.table.items():
         print("%d %s%s%s" % (snake_id, fg("light_" + score[0]), score[1], attr("reset")), "\t", end="")
     print()
+
     for side, score in world.team_score.items():
-        print("%s%d%s" % (fg("light_" + score[0]), score[1], attr("reset")), "\t", end="")
+        print("%s%s%s" % (fg("light_" + score[0]), side + ": " + str(score[1]), attr("reset")), "\t", end="")
 
     print()
     print("\033[%d;%dH" % (0, 0))

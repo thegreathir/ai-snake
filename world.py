@@ -41,6 +41,14 @@ class Side:
         return Side.COLORS[2]
 
 
+def side_name(side):
+    if side == Side.A:
+        return "A"
+    if side == Side.B:
+        return "B"
+    return "ERROR"
+
+
 class Snake:
 
     def __init__(self, snake_id, x, y, direction):
@@ -111,8 +119,8 @@ class World:
                 b_score += snake.score
             self.table[snake.snake_id] = (snake.color, snake.score)
 
-        self.team_score[Side.A] = (Side.get_color(Side.A), a_score)
-        self.team_score[Side.B] = (Side.get_color(Side.B), b_score)
+        self.team_score[side_name(Side.A)] = (Side.get_color(Side.A), a_score)
+        self.team_score[side_name(Side.B)] = (Side.get_color(Side.B), b_score)
 
     def collision_bodies(self, snake_id, point):
         snake = self.snakes[snake_id]

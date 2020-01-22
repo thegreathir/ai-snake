@@ -18,13 +18,15 @@
   "agent_a": {
     "type": "alphabeta",
     "properties": {
+      "heuristic": "score",
       "depth": 16
     }
   },
   "agent_b": {
     "type": "alphabeta",
     "properties": {
-      "depth": 16
+      "heuristic": "eat count",
+      "depth": 7
     }
   }
 }

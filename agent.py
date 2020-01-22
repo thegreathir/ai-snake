@@ -1,9 +1,5 @@
-from ai.dls import get_dls_action
-from ai.gs import get_gs_action
-from world import *
-import random
-import sys, os, termios
 from ai import cppagent
+from world import *
 
 
 def get_random_action():
@@ -21,10 +17,10 @@ class AlphaBetaAgent(Agent):
 
     def __init__(self, world, properties):
         super().__init__(world)
-        self.depth = properties["depth"]
+        self.properties = json.dumps(properties)
 
     def get_action(self, world):
-        return cppagent.get_alphabeta_action(world.to_json(self.snake_id), self.depth)
+        return cppagent.get_alphabeta_action(world.to_json(self.snake_id), self.properties)
 
 
 class RandomAgent(Agent):
