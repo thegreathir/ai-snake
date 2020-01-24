@@ -1,3 +1,4 @@
+from ai.dls import get_dls_action
 from ai import cppagent
 from world import *
 
@@ -28,6 +29,11 @@ class RandomAgent(Agent):
     def get_action(self, world):
         return get_random_action()
 
+
+class DLS(Agent):
+
+    def get_action(self, world):
+        return get_dls_action(world, world.snakes[self.snake_id])
 
 class HumanAgent(Agent):
 
