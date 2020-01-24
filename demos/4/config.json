@@ -1,0 +1,33 @@
+{
+  "target_score": 500,
+  "height": 8,
+  "width": 8,
+  "min_score": 1,
+  "max_score": 5,
+  "a": 10,
+  "b": 5,
+  "max_cycles": 1000,
+  "persist_score": false,
+  "turn_cost": 1,
+  "collision_cost": 1,
+  "load_map": true,
+  "interval": 500,
+  "players_per_team": 3,
+  "simulation_mode": false,
+  "decay_cost": 1,
+  "init_points": [{"x": 2, "y": 7}, {"x": 3, "y": 7}, {"x": 4, "y": 7}, {"x": 5, "y": 7}, {"x": 0, "y": 0}, {"x": 7, "y": 0}],
+  "agent_a": {
+    "type": "alphabeta",
+    "properties": {
+      "heuristic": "score",
+      "depth": 16
+    }
+  },
+  "agent_b": {
+    "type": "alphabeta",
+    "properties": {
+      "heuristic": "eat count",
+      "depth": 7
+    }
+  }
+}
