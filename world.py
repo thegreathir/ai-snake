@@ -284,7 +284,7 @@ class World:
 
         if not self.simulation_mode:
             cursor.show()
-            input()
+            time.sleep(2)
             os.system("clear")
         else:
             for snake in self.snakes:
