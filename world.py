@@ -88,6 +88,7 @@ class World:
         self.load_map = False
         self.collision_cost = 1
         self.decay_cost = 1
+        self.init_points = None
 
         if json_config is not None:
             self.load_config(json_config)
@@ -305,6 +306,7 @@ class World:
         self.load_map = json_config.get("load_map", False)
         self.collision_cost = json_config.get("collision_cost", self.collision_cost)
         self.decay_cost = json_config.get("decay_cost", self.decay_cost)
+        self.init_points = [(item['x'], item['y']) for item in json_config.get("init_points", [])]
 
     def to_json(self, snake_id):
         res = dict()
@@ -340,7 +342,7 @@ class World:
         new_id = self.last_id
         self.last_id = self.last_id + 1
         self.agents[new_id] = agent
-
-        self.snakes.append(Snake(new_id, random.randint(0, self.width - 1), random.randint(0, self.height - 1),
+        init_point = (random.randint(0, self.width - 1), random.randint(0, self.height - 1)) if not self.init_points or len(self.init_points) == 0 else self.init_points[new_id]
+        self.snakes.append(Snake(new_id, init_point[0], init_point[1],
                                  "rlud"[random.randint(0, 3)]))
         return new_id

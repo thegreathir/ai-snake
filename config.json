@@ -15,6 +15,7 @@
   "players_per_team": 1,
   "simulation_mode": false,
   "decay_cost": 1,
+  "init_points": [{"x": 0, "y": 0}, {"x": 1, "y": 1}],
   "agent_a": {
     "type": "alphabeta",
     "properties": {
